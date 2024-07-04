@@ -1,6 +1,7 @@
 package com.sparta.everydrink.domain.liked.entity;
 
 import com.sparta.everydrink.domain.common.TimeStampEntity;
+import com.sparta.everydrink.domain.post.entity.Post;
 import com.sparta.everydrink.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,6 +16,10 @@ public class Liked extends TimeStampEntity {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
+
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -25,8 +30,9 @@ public class Liked extends TimeStampEntity {
     @Column(name = "content_type", nullable = false)
     private ContentsTypeEnum contentsType;
 
-    public Liked(User user, Long contentsId, ContentsTypeEnum contentsType) {
+    public Liked(User user, Post post, Long contentsId, ContentsTypeEnum contentsType) {
         this.user = user;
+        this.post = post;
         this.contentsId = contentsId;
         this.contentsType = contentsType;
     }

@@ -2,6 +2,7 @@ package com.sparta.everydrink.domain.post.entity;
 
 import com.sparta.everydrink.domain.comment.entity.Comment;
 import com.sparta.everydrink.domain.common.TimeStampEntity;
+import com.sparta.everydrink.domain.liked.entity.Liked;
 import com.sparta.everydrink.domain.post.dto.PostRequestDto;
 import com.sparta.everydrink.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -35,6 +36,9 @@ public class Post extends TimeStampEntity {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post")
+    private List<Liked> likes;
 
     public Post(PostRequestDto postRequestDto, User user) {
         this.user = user;

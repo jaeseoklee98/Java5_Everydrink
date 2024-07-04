@@ -1,6 +1,7 @@
 package com.sparta.everydrink.domain.liked.controller;
 
 import com.sparta.everydrink.domain.common.CommonResponseDto;
+import com.sparta.everydrink.domain.liked.dto.LikedPostsResponseDto;
 import com.sparta.everydrink.domain.liked.dto.LikedRequestDto;
 import com.sparta.everydrink.domain.liked.dto.LikedResponseDto;
 import com.sparta.everydrink.domain.liked.service.LikedService;
@@ -44,6 +45,21 @@ public class LikedController {
                 .body(CommonResponseDto.<LikedResponseDto>builder()
                         .statusCode(HttpStatus.OK.value())
                         .message("좋아요 제거 성공")
+                        .build());
+    }
+
+    @GetMapping("/posts")
+    public ResponseEntity<CommonResponseDto<LikedPostsResponseDto>> getLikedPosts(
+            @AuthenticationPrincipal UserDetailsImpl user,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        LikedPostsResponseDto responseDto = likedService.getLikedPosts(user, page, size);
+        return ResponseEntity.ok()
+                .body(CommonResponseDto.<LikedPostsResponseDto>builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .message("좋아요한 게시물 조회 성공")
+                        .data(responseDto)
                         .build());
     }
 }

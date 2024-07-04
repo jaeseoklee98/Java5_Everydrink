@@ -2,11 +2,13 @@ package com.sparta.everydrink.domain.liked.service;
 
 import com.sparta.everydrink.domain.comment.entity.Comment;
 import com.sparta.everydrink.domain.comment.repository.CommentRepository;
+import com.sparta.everydrink.domain.liked.dto.LikedPostsResponseDto;
 import com.sparta.everydrink.domain.liked.dto.LikedRequestDto;
 import com.sparta.everydrink.domain.liked.dto.LikedResponseDto;
 import com.sparta.everydrink.domain.liked.entity.ContentsTypeEnum;
 import com.sparta.everydrink.domain.liked.entity.Liked;
 import com.sparta.everydrink.domain.liked.repository.LikedRepository;
+import com.sparta.everydrink.domain.post.dto.PostResponseDto;
 import com.sparta.everydrink.domain.post.entity.Post;
 import com.sparta.everydrink.domain.post.repository.PostRepository;
 import com.sparta.everydrink.domain.user.entity.User;
@@ -15,8 +17,11 @@ import com.sparta.everydrink.security.UserDetailsImpl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -41,17 +46,20 @@ public class LikedService {
 
         // 본인이 작성한 게시물이나 댓글에 좋아요를 남길 수 없습니다.
         // POST
+        Post post = null;
         if (likedRequestDto.getContentsType() == ContentsTypeEnum.POST) {
-            Post post = postRepository.findById(likedRequestDto.getContentsId())
+            post = postRepository.findById(likedRequestDto.getContentsId())
                     .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다."));
             if (post.getUser().getId().equals(currentUser.getId())) {
                 throw new IllegalArgumentException("본인이 작성한 게시물에는 좋아요를 남길 수 없습니다.");
             }
             post.setLikeCount(post.getLikeCount() + 1); //변경 감지 -> 따로 save 필요없다.
         }
-        //COMMENT
-        else if (likedRequestDto.getContentsType() == ContentsTypeEnum.COMMENT) {
-            Comment comment = commentRepository.findById(likedRequestDto.getContentsId())
+
+        // COMMENT
+        Comment comment = null;
+        if (likedRequestDto.getContentsType() == ContentsTypeEnum.COMMENT) {
+            comment = commentRepository.findById(likedRequestDto.getContentsId())
                     .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
             if (comment.getUser().getId().equals(currentUser.getId())) {
                 throw new IllegalArgumentException("본인이 작성한 댓글에는 좋아요를 남길 수 없습니다.");
@@ -59,7 +67,7 @@ public class LikedService {
             comment.setLikeCount(comment.getLikeCount() + 1);
         }
 
-        Liked liked = new Liked(currentUser, likedRequestDto.getContentsId(), likedRequestDto.getContentsType());
+        Liked liked = new Liked(currentUser, post, likedRequestDto.getContentsId(), likedRequestDto.getContentsType());
         likedRepository.save(liked);
 
         return new LikedResponseDto(liked);
@@ -88,5 +96,16 @@ public class LikedService {
         }
 
         likedRepository.delete(existingLike);
+    }
+
+    @Transactional
+    public LikedPostsResponseDto getLikedPosts(UserDetailsImpl user, int page, int size) {
+        User curruntUser = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<PostResponseDto> likedPosts = likedRepository.findLikedPostsByUserId(curruntUser.getId(), pageRequest);
+
+        return new LikedPostsResponseDto(likedPosts.getContent(), likedPosts.getTotalPages(), likedPosts.getTotalElements());
     }
 }

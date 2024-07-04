@@ -35,6 +35,8 @@ public class QPost extends EntityPathBase<Post> {
 
     public final NumberPath<Long> likeCount = createNumber("likeCount", Long.class);
 
+    public final ListPath<com.sparta.everydrink.domain.liked.entity.Liked, com.sparta.everydrink.domain.liked.entity.QLiked> likes = this.<com.sparta.everydrink.domain.liked.entity.Liked, com.sparta.everydrink.domain.liked.entity.QLiked>createList("likes", com.sparta.everydrink.domain.liked.entity.Liked.class, com.sparta.everydrink.domain.liked.entity.QLiked.class, PathInits.DIRECT2);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 

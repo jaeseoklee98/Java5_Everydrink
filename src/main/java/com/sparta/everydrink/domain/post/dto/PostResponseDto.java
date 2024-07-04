@@ -28,4 +28,15 @@ public class PostResponseDto {
         this.updatedAt = post.getModifiedAt();
         this.likeCount = post.getLikeCount();
     }
+
+    // QueryDSL 프로젝션을 위한 생성자 추가
+    public PostResponseDto(Long id, String title, String content, Long likeCount, String username, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.likeCount = likeCount;
+        this.username = username;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 }
