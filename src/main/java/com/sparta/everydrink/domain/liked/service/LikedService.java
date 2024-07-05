@@ -1,7 +1,9 @@
 package com.sparta.everydrink.domain.liked.service;
 
+import com.sparta.everydrink.domain.comment.dto.CommentResponseDto;
 import com.sparta.everydrink.domain.comment.entity.Comment;
 import com.sparta.everydrink.domain.comment.repository.CommentRepository;
+import com.sparta.everydrink.domain.liked.dto.LikedCommentsResponseDto;
 import com.sparta.everydrink.domain.liked.dto.LikedPostsResponseDto;
 import com.sparta.everydrink.domain.liked.dto.LikedRequestDto;
 import com.sparta.everydrink.domain.liked.dto.LikedResponseDto;
@@ -67,7 +69,7 @@ public class LikedService {
             comment.setLikeCount(comment.getLikeCount() + 1);
         }
 
-        Liked liked = new Liked(currentUser, post, likedRequestDto.getContentsId(), likedRequestDto.getContentsType());
+        Liked liked = new Liked(currentUser, post, comment, likedRequestDto.getContentsId(), likedRequestDto.getContentsType());
         likedRepository.save(liked);
 
         return new LikedResponseDto(liked);
@@ -107,5 +109,16 @@ public class LikedService {
         Page<PostResponseDto> likedPosts = likedRepository.findLikedPostsByUserId(curruntUser.getId(), pageRequest);
 
         return new LikedPostsResponseDto(likedPosts.getContent(), likedPosts.getTotalPages(), likedPosts.getTotalElements());
+    }
+
+    @Transactional
+    public LikedCommentsResponseDto getLikedComments(UserDetailsImpl user, int page, int size) {
+        User currentUser = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<CommentResponseDto> likedComments = likedRepository.findLikedCommentsByUserId(currentUser.getId(), pageRequest);
+
+        return new LikedCommentsResponseDto(likedComments.getContent(), likedComments.getTotalPages(), likedComments.getTotalElements());
     }
 }

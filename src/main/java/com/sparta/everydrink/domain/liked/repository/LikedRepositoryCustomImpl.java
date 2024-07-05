@@ -2,21 +2,21 @@ package com.sparta.everydrink.domain.liked.repository;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sparta.everydrink.domain.comment.dto.CommentResponseDto;
+import com.sparta.everydrink.domain.comment.entity.QComment;
 import com.sparta.everydrink.domain.liked.entity.ContentsTypeEnum;
 import com.sparta.everydrink.domain.liked.entity.QLiked;
 import com.sparta.everydrink.domain.post.dto.PostResponseDto;
-import com.sparta.everydrink.domain.post.entity.Post;
 import com.sparta.everydrink.domain.post.entity.QPost;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.expression.spel.ast.Projection;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Repository
 @RequiredArgsConstructor
 public class LikedRepositoryCustomImpl implements LikedRepositoryCustom {
 
@@ -47,7 +47,32 @@ public class LikedRepositoryCustomImpl implements LikedRepositoryCustom {
         long total = queryFactory.selectFrom(liked)
                 .where(liked.user.id.eq(userId).and(liked.contentsType.eq(ContentsTypeEnum.POST)))
                 .fetchCount();
-        return new PageImpl<>(likedPosts,pageable,total);
+        return new PageImpl<>(likedPosts, pageable, total);
+    }
+
+    @Override
+    public Page<CommentResponseDto> findLikedCommentsByUserId(Long userId, Pageable pageable) {
+        QLiked liked = QLiked.liked;
+        QComment comment = QComment.comment;
+
+        List<CommentResponseDto> likedComments = queryFactory
+                .select(Projections.constructor(CommentResponseDto.class,
+                        comment.id,
+                        comment.content,
+                        comment.createdAt,
+                        comment.modifiedAt,
+                        comment.likeCount))
+                .from(liked)
+                .join(comment).on(liked.contentsId.eq(comment.id))
+                .where(liked.user.id.eq(userId).and(liked.contentsType.eq(ContentsTypeEnum.COMMENT)))
+                .orderBy(comment.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = queryFactory.selectFrom(liked)
+                .where(liked.user.id.eq(userId).and(liked.contentsType.eq(ContentsTypeEnum.COMMENT)))
+                .fetchCount();
+        return new PageImpl<>(likedComments, pageable, total);
     }
 }
-

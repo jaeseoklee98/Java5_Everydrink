@@ -24,6 +24,8 @@ public class QLiked extends EntityPathBase<Liked> {
 
     public final com.sparta.everydrink.domain.common.QTimeStampEntity _super = new com.sparta.everydrink.domain.common.QTimeStampEntity(this);
 
+    public final com.sparta.everydrink.domain.comment.entity.QComment comment;
+
     public final NumberPath<Long> contentsId = createNumber("contentsId", Long.class);
 
     public final EnumPath<ContentsTypeEnum> contentsType = createEnum("contentsType", ContentsTypeEnum.class);
@@ -58,6 +60,7 @@ public class QLiked extends EntityPathBase<Liked> {
 
     public QLiked(Class<? extends Liked> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.comment = inits.isInitialized("comment") ? new com.sparta.everydrink.domain.comment.entity.QComment(forProperty("comment"), inits.get("comment")) : null;
         this.post = inits.isInitialized("post") ? new com.sparta.everydrink.domain.post.entity.QPost(forProperty("post"), inits.get("post")) : null;
         this.user = inits.isInitialized("user") ? new com.sparta.everydrink.domain.user.entity.QUser(forProperty("user")) : null;
     }
