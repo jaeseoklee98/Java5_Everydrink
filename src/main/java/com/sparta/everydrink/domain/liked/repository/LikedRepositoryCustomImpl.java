@@ -75,4 +75,13 @@ public class LikedRepositoryCustomImpl implements LikedRepositoryCustom {
                 .fetchCount();
         return new PageImpl<>(likedComments, pageable, total);
     }
+
+    @Override
+    public long countByUserIdAndContentsType(Long userId, ContentsTypeEnum contentsType) {
+        QLiked liked = QLiked.liked;
+        return queryFactory
+                .selectFrom(liked)
+                .where(liked.user.id.eq(userId).and(liked.contentsType.eq(contentsType)))
+                .fetchCount();
+    }
 }

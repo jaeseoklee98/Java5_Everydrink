@@ -1,5 +1,7 @@
 package com.sparta.everydrink.domain.user.service;
 
+import com.sparta.everydrink.domain.liked.entity.ContentsTypeEnum;
+import com.sparta.everydrink.domain.liked.repository.LikedRepository;
 import com.sparta.everydrink.domain.user.dto.ChangePasswordRequestDto;
 import com.sparta.everydrink.domain.user.dto.ProfileRequestDto;
 import com.sparta.everydrink.domain.user.dto.ProfileResponseDto;
@@ -32,6 +34,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     static final String ADMIN_KEY = "7Ja065Oc66+87YKk";
+    private final LikedRepository likedRepository;
 
     public void signUp(UserSignupRequestDto requestDto) {
         UserRoleEnum role = UserRoleEnum.USER;
@@ -59,7 +62,9 @@ public class UserService {
 
     //프로필 조회
     public ProfileResponseDto getProfile(User user) {
-        return new ProfileResponseDto(user.getUsername(), user.getNickname());
+        long likedPostsCount = likedRepository.countByUserIdAndContentsType(user.getId(), ContentsTypeEnum.POST);
+        long likedCommentsCount = likedRepository.countByUserIdAndContentsType(user.getId(), ContentsTypeEnum.COMMENT);
+        return new ProfileResponseDto(user.getUsername(), user.getNickname(),likedPostsCount,likedCommentsCount);
     }
 
     //프로필 수정
